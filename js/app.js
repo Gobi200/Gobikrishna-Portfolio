@@ -339,6 +339,52 @@
   };
 
   // --------------------------------------------------------------------------
+  // Smooth Scroll Reveal Animation (IntersectionObserver)
+  // --------------------------------------------------------------------------
+  function setupScrollReveal() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .reveal-delay-1 { transition-delay: 0.08s; }
+      .reveal-delay-2 { transition-delay: 0.16s; }
+      .reveal-delay-3 { transition-delay: 0.24s; }
+      .reveal-delay-4 { transition-delay: 0.32s; }
+    `;
+    document.head.appendChild(style);
+
+    const targets = document.querySelectorAll(
+      'section > div > div, .project-card, .glass-card, section .text-center'
+    );
+
+    targets.forEach((el, i) => {
+      el.classList.add('reveal');
+      const siblingIndex = Array.from(el.parentElement?.children || []).indexOf(el);
+      if (siblingIndex >= 1 && siblingIndex <= 4) {
+        el.classList.add(`reveal-delay-${siblingIndex}`);
+      }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    targets.forEach(el => observer.observe(el));
+  }
+
+  // --------------------------------------------------------------------------
   // ScrollSpy for Active Navbar Links
   // --------------------------------------------------------------------------
   function setupScrollSpy() {
@@ -376,5 +422,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     runTypewriter();
     setupScrollSpy();
+    setupScrollReveal();
   });
 })();
